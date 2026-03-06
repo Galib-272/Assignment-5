@@ -86,26 +86,26 @@
 
     <!-- ========== MAIN CONTENT ========== -->
     <div class="max-w-6xl mx-auto px-4 py-6">
-      <!-- Tabs: All / Open / Closed -->
-      <div class="flex gap-2 mb-6">
+      <!-- Tabs: All / Open / Closed — inside a white card like the screenshot -->
+      <div class="bg-white rounded-xl shadow-sm px-4 py-3 mb-4 flex gap-3">
         <button
           id="tab-all"
           onclick="switchTab('all')"
-          class="btn btn-sm btn-primary text-white"
+          class="btn btn-sm btn-primary text-white px-5"
         >
           All
         </button>
         <button
           id="tab-open"
           onclick="switchTab('open')"
-          class="btn btn-sm btn-ghost border border-gray-300 bg-white text-gray-700"
+          class="btn btn-sm btn-ghost border border-gray-200 bg-white text-gray-700 px-5"
         >
           Open
         </button>
         <button
           id="tab-closed"
           onclick="switchTab('closed')"
-          class="btn btn-sm btn-ghost border border-gray-300 bg-white text-gray-700"
+          class="btn btn-sm btn-ghost border border-gray-200 bg-white text-gray-700 px-5"
         >
           Closed
         </button>
@@ -116,7 +116,12 @@
         class="bg-white rounded-xl shadow-sm px-6 py-4 mb-6 flex items-center justify-between"
       >
         <div class="flex items-center gap-3">
-          <img src="assets/Aperture.png" alt="Issues Icon" class="w-8 h-8" />
+          <!-- Purple circle background around the icon, like in the screenshot -->
+          <div
+            class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center"
+          >
+            <img src="assets/Aperture.png" alt="Issues Icon" class="w-7 h-7" />
+          </div>
           <div>
             <h2 class="text-xl font-bold text-gray-800" id="issue-count">
               0 Issues
@@ -126,17 +131,15 @@
             </p>
           </div>
         </div>
-        <div class="flex items-center gap-4 text-sm text-gray-600">
-          <span class="flex items-center gap-1">
-            <img src="assets/Open-Status.png" alt="Open" class="w-4 h-4" />
+        <div class="flex items-center gap-4 text-sm text-gray-700 font-medium">
+          <span class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
             Open
           </span>
-          <span class="flex items-center gap-1">
-            <img
-              src="assets/Closed- Status .png"
-              alt="Closed"
-              class="w-4 h-4"
-            />
+          <span class="flex items-center gap-2">
+            <span
+              class="w-3 h-3 rounded-full bg-purple-500 inline-block"
+            ></span>
             Closed
           </span>
         </div>
