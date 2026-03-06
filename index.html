@@ -5,21 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GitHub Issues Tracker - Login</title>
 
-    <!-- Geist Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap"
       rel="stylesheet"
     />
-
     <link
       href="https://cdn.jsdelivr.net/npm/daisyui@4.6.0/dist/full.min.css"
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tell Tailwind to use Geist as the default font -->
     <script>
       tailwind.config = {
         theme: {
@@ -32,74 +29,42 @@
       };
     </script>
 
-    <!-- Apply the font globally via CSS as well (backup) -->
     <style>
-      * {
-        font-family: "Geist", sans-serif;
-      }
+      * { font-family: "Geist", sans-serif; }
     </style>
   </head>
 
-  <body
-    class="min-h-screen bg-gray-100 flex items-center justify-center font-sans"
-  >
-    <!-- Login Card -->
+  <body class="min-h-screen bg-gray-100 flex items-center justify-center font-sans">
     <div class="bg-white rounded-xl shadow-md p-10 w-full max-w-md">
-      <!-- Logo + Title -->
       <div class="flex flex-col items-center mb-6">
-        <img
-          src="assets/github-logo.png"
-          alt="GitHub Logo"
-          class="w-20 h-20 mb-4 rounded-full"
-        />
+        <img src="assets/github-logo.png" alt="GitHub Logo" class="w-20 h-20 mb-4 rounded-full" />
         <h1 class="text-2xl font-bold text-gray-800">GitHub Issues Tracker</h1>
         <p class="text-gray-500 text-sm mt-1">Sign in to manage your issues</p>
       </div>
 
-      <!-- Username -->
       <div class="mb-4">
         <label class="block text-gray-700 font-medium mb-1">Username</label>
-        <input
-          type="text"
-          id="username"
-          placeholder="Enter Username"
-          class="input input-bordered w-full"
-        />
+        <input type="text" id="username" placeholder="Enter Username" class="input input-bordered w-full" />
         <p class="text-blue-600 text-sm mt-1">Default: admin</p>
       </div>
 
-      <!-- Password -->
       <div class="mb-5">
         <label class="block text-gray-700 font-medium mb-1">Password</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Enter Password"
-          class="input input-bordered w-full"
-        />
+        <input type="password" id="password" placeholder="Enter Password" class="input input-bordered w-full" />
         <p class="text-blue-600 text-sm mt-1">Default: admin123</p>
       </div>
 
-      <!-- Error Message -->
       <p id="error-msg" class="text-red-500 text-sm mb-3 hidden">
         Wrong username or password!
       </p>
 
-      <!-- Sign In Button -->
-      <button
-        onclick="handleLogin()"
-        class="btn btn-primary w-full text-white text-base"
-      >
+      <button onclick="handleLogin()" class="btn btn-primary w-full text-white text-base">
         Sign In
       </button>
 
-      <!-- Divider -->
       <div class="divider text-gray-400 text-sm">OR</div>
 
-      <!-- Demo Credentials Box -->
-      <div
-        class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-sm text-gray-600"
-      >
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-sm text-gray-600">
         <p class="mb-1 text-gray-500">Demo Credentials:</p>
         <p><span class="font-semibold">Username:</span> admin</p>
         <p><span class="font-semibold">Password:</span> admin123</p>
