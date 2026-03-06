@@ -9,21 +9,18 @@ var API_SEARCH =
 var API_SINGLE = "https://phi-lab-server.vercel.app/api/v1/lab/issue/";
 
 // --- App State ---
-var allIssues = []; // stores all fetched issues
-var currentTab = "all"; // active tab: "all", "open", "closed"
-var searchTimer = null; // used to delay search so we don't call API on every keystroke
+var allIssues = [];
+var currentTab = "all";
+var searchTimer = null;
 
 // =============================================
 // ON PAGE LOAD
 // =============================================
 window.onload = function () {
-  // If user is not logged in, send them back to login page
   if (localStorage.getItem("isLoggedIn") !== "true") {
     window.location.href = "index.html";
     return;
   }
-
-  // Start loading all issues from the API
   loadAllIssues();
 };
 
@@ -46,7 +43,6 @@ function loadAllIssues() {
       return response.json();
     })
     .then(function (data) {
-      // The API might return an array directly, or inside a property
       if (Array.isArray(data)) {
         allIssues = data;
       } else if (data.issues && Array.isArray(data.issues)) {
@@ -55,25 +51,22 @@ function loadAllIssues() {
         allIssues = data.data;
       } else {
         allIssues = [];
-        console.log("Unexpected API response format:", data);
       }
-
       renderIssues(allIssues);
       showLoading(false);
     })
     .catch(function (error) {
-      console.log("Error fetching issues:", error);
+      console.log("Error:", error);
       showLoading(false);
     });
 }
 
 // =============================================
-// TAB SWITCHING — All / Open / Closed
+// TAB SWITCHING
 // =============================================
 function switchTab(tab) {
   currentTab = tab;
 
-  // Update button styles — active tab gets blue, others get plain
   var tabNames = ["all", "open", "closed"];
   tabNames.forEach(function (t) {
     var btn = document.getElementById("tab-" + t);
@@ -85,61 +78,42 @@ function switchTab(tab) {
     }
   });
 
-  // Clear search input when switching tabs
   document.getElementById("search-input").value = "";
-
-  // Filter and show issues for this tab
-  var filtered = filterByTab(allIssues, tab);
-  renderIssues(filtered);
+  renderIssues(filterByTab(allIssues, tab));
 }
 
 // =============================================
-// FILTER ISSUES BY STATUS
+// FILTER BY TAB
 // =============================================
 function filterByTab(issues, tab) {
   if (tab === "all") return issues;
-
   return issues.filter(function (issue) {
-    var status = (issue.status || "").toLowerCase();
-    return status === tab;
+    return (issue.status || "").toLowerCase() === tab;
   });
 }
 
 // =============================================
-// SEARCH — runs every time user types in search box
+// SEARCH
 // =============================================
 function handleSearch(query) {
   clearTimeout(searchTimer);
 
-  // If search box is empty, just show current tab's issues
   if (query.trim() === "") {
-    var filtered = filterByTab(allIssues, currentTab);
-    renderIssues(filtered);
+    renderIssues(filterByTab(allIssues, currentTab));
     return;
   }
 
-  // Wait 400ms after user stops typing, then call the search API
   searchTimer = setTimeout(function () {
     showLoading(true);
-
     fetch(API_SEARCH + encodeURIComponent(query.trim()))
       .then(function (res) {
         return res.json();
       })
       .then(function (data) {
-        var results = [];
-
-        if (Array.isArray(data)) {
-          results = data;
-        } else if (data.issues && Array.isArray(data.issues)) {
-          results = data.issues;
-        } else if (data.data && Array.isArray(data.data)) {
-          results = data.data;
-        }
-
-        // Also filter by current tab
-        var filtered = filterByTab(results, currentTab);
-        renderIssues(filtered);
+        var results = Array.isArray(data)
+          ? data
+          : data.issues || data.data || [];
+        renderIssues(filterByTab(results, currentTab));
         showLoading(false);
       })
       .catch(function () {
@@ -149,17 +123,14 @@ function handleSearch(query) {
 }
 
 // =============================================
-// RENDER ALL ISSUE CARDS TO THE SCREEN
+// RENDER ISSUES
 // =============================================
 function renderIssues(issues) {
   var grid = document.getElementById("issues-grid");
   var noResults = document.getElementById("no-results");
 
-  // Update the count number
   document.getElementById("issue-count").textContent =
     issues.length + " Issues";
-
-  // Clear old cards
   grid.innerHTML = "";
 
   if (issues.length === 0) {
@@ -171,87 +142,124 @@ function renderIssues(issues) {
   noResults.classList.add("hidden");
   grid.classList.remove("hidden");
 
-  // Create a card for each issue
   issues.forEach(function (issue) {
-    var card = buildCard(issue);
-    grid.appendChild(card);
+    grid.appendChild(buildCard(issue));
   });
 }
 
 // =============================================
-// BUILD ONE ISSUE CARD
+// BUILD ONE CARD — using DOM methods, no innerHTML for labels
 // =============================================
 function buildCard(issue) {
-  var card = document.createElement("div");
-
   var status = (issue.status || "").toLowerCase();
   var isOpen = status === "open";
 
-  // Green top border for open, purple for closed
-  var borderColor = isOpen ? "border-green-500" : "border-purple-500";
-
-  card.className =
-    "bg-white rounded-lg shadow-sm border-t-4 " +
-    borderColor +
-    " p-4 cursor-pointer hover:shadow-md transition-shadow duration-200";
-
-  // Build labels HTML
-  var labelsHTML = "";
-  var labelsArray = getLabelsArray(issue.labels);
-
-  labelsArray.forEach(function (label) {
-    var style = getLabelStyle(label);
-    labelsHTML +=
-      '<span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ' +
-      style.classes +
-      '">' +
-      style.icon +
-      label +
-      "</span>";
+  // --- Card wrapper ---
+  var card = document.createElement("div");
+  card.style.cssText =
+    "background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); border-top:4px solid " +
+    (isOpen ? "#22c55e" : "#a855f7") +
+    "; padding:16px; cursor:pointer; transition:box-shadow 0.2s; display:flex; flex-direction:column; height:100%;";
+  card.addEventListener("mouseenter", function () {
+    card.style.boxShadow = "0 4px 12px rgba(0,0,0,0.12)";
+  });
+  card.addEventListener("mouseleave", function () {
+    card.style.boxShadow = "0 1px 3px rgba(0,0,0,0.08)";
   });
 
-  // Priority badge style
-  var priorityStyle = getPriorityStyle(issue.priority);
-  var priorityText = (issue.priority || "N/A").toUpperCase();
+  // --- Top row: status icon + priority badge ---
+  var topRow = document.createElement("div");
+  topRow.style.cssText =
+    "display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;";
 
-  // Use Open-Status.png for open issues, Closed- Status .png for closed issues
-  var statusIcon = isOpen
-    ? '<img src="assets/Open-Status.png" alt="Open" class="w-5 h-5" />'
-    : '<img src="assets/Closed- Status .png" alt="Closed" class="w-5 h-5" />';
+  var iconImg = document.createElement("img");
+  iconImg.src = isOpen
+    ? "assets/Open-Status.png"
+    : "assets/Closed- Status .png";
+  iconImg.style.cssText = "width:20px; height:20px;";
 
-  // Date, author, id
-  var dateText = formatDate(issue.createdAt || issue.created_at);
+  var priorityInfo = getPriorityStyle(issue.priority);
+  var prioritySpan = document.createElement("span");
+  prioritySpan.textContent = (issue.priority || "N/A").toUpperCase();
+  prioritySpan.style.cssText =
+    "background:" +
+    priorityInfo.bg +
+    "; color:" +
+    priorityInfo.color +
+    "; border-radius:999px; padding:3px 10px; font-size:11px; font-weight:700;";
+
+  topRow.appendChild(iconImg);
+  topRow.appendChild(prioritySpan);
+  card.appendChild(topRow);
+
+  // --- Title ---
+  var title = document.createElement("h3");
+  title.textContent = issue.title || "Untitled";
+  title.style.cssText =
+    "font-weight:700; color:#1f2937; font-size:13px; line-height:1.4; margin-bottom:6px;";
+  card.appendChild(title);
+
+  // --- Description ---
+  var desc = document.createElement("p");
+  desc.textContent = issue.description || "No description.";
+  desc.style.cssText =
+    "color:#9ca3af; font-size:11px; margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;";
+  card.appendChild(desc);
+
+  // --- Labels row ---
+  var labelsRow = document.createElement("div");
+  labelsRow.style.cssText =
+    "display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:12px; margin-top:auto;";
+
+  var labelsArray = getLabelsArray(issue.labels);
+  labelsArray.forEach(function (label) {
+    var info = getLabelStyle(label);
+
+    var badge = document.createElement("span");
+    badge.style.cssText =
+      "display:flex; flex-direction:row; align-items:center; background:" +
+      info.bg +
+      "; color:" +
+      info.color +
+      "; border:1px solid " +
+      info.border +
+      "; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600; white-space:nowrap;";
+
+    // Add icon image if available
+    if (info.iconSrc) {
+      var iconEl = document.createElement("img");
+      iconEl.src = info.iconSrc;
+      iconEl.style.cssText =
+        "width:12px; height:12px; margin-right:5px; display:block;";
+      badge.appendChild(iconEl);
+    }
+
+    // Add label text
+    var labelText = document.createTextNode(label);
+    badge.appendChild(labelText);
+
+    labelsRow.appendChild(badge);
+  });
+
+  card.appendChild(labelsRow);
+
+  // --- Divider line ---
+  var divider = document.createElement("hr");
+  divider.style.cssText =
+    "border:none; border-top:1px solid #e5e7eb; margin-bottom:10px;";
+  card.appendChild(divider);
+
+  // --- Footer: issue number, author, date ---
+  var footer = document.createElement("div");
+  footer.style.cssText = "color:#9ca3af; font-size:11px;";
+
   var author = issue.author || issue.user || issue.createdBy || "unknown";
   var issueNum = issue.id || issue._id || issue.number || "?";
+  var dateText = formatDate(issue.createdAt || issue.created_at);
 
-  card.innerHTML =
-    '<div class="flex justify-between items-center mb-3">' +
-    statusIcon +
-    '<span class="text-xs font-semibold px-3 py-0.5 ' +
-    priorityStyle +
-    '">' +
-    priorityText +
-    "</span>" +
-    "</div>" +
-    '<h3 class="font-bold text-gray-800 text-sm leading-snug mb-1">' +
-    (issue.title || "Untitled") +
-    "</h3>" +
-    '<p class="text-gray-400 text-xs mb-3 line-clamp-2">' +
-    (issue.description || "No description provided.") +
-    "</p>" +
-    '<div class="flex flex-wrap gap-1 mb-3">' +
-    labelsHTML +
-    "</div>" +
-    '<div class="text-xs text-gray-400">' +
-    "<p>#" +
-    issueNum +
-    " by " +
-    author +
-    "</p>" +
-    "<p>" +
-    dateText +
-    "</p>" +
-    "</div>";
+  footer.innerHTML =
+    "<p>#" + issueNum + " by " + author + "</p><p>" + dateText + "</p>";
+  card.appendChild(footer);
 
   // Click opens modal
   card.addEventListener("click", function () {
@@ -262,79 +270,78 @@ function buildCard(issue) {
 }
 
 // =============================================
-// OPEN THE ISSUE DETAIL MODAL
+// OPEN MODAL
 // =============================================
 function openModal(issue) {
   var status = (issue.status || "").toLowerCase();
   var isOpen = status === "open";
 
-  // Title
   document.getElementById("modal-title").textContent =
     issue.title || "No Title";
 
-  // Status badge
   var statusBadge = document.getElementById("modal-status-badge");
   statusBadge.textContent = isOpen ? "Opened" : "Closed";
   statusBadge.className =
     "badge text-white font-semibold px-3 py-1 rounded-full " +
     (isOpen ? "bg-green-500" : "bg-purple-500");
 
-  // Author + Date
-  var author = issue.author || issue.user || issue.createdBy || "Unknown";
-  document.getElementById("modal-author").textContent = author;
+  document.getElementById("modal-author").textContent =
+    issue.author || issue.user || "Unknown";
   document.getElementById("modal-date").textContent = formatDate(
     issue.createdAt || issue.created_at,
   );
-
-  // Description
   document.getElementById("modal-description").textContent =
-    issue.description || "No description provided.";
-
-  // Assignee
+    issue.description || "No description.";
   document.getElementById("modal-assignee").textContent = issue.assignee || "—";
 
-  // Priority badge
   var priorityBadge = document.getElementById("modal-priority-badge");
   priorityBadge.textContent = (issue.priority || "N/A").toUpperCase();
   priorityBadge.className =
-    "badge text-white font-semibold px-3 rounded " +
-    getModalPriorityStyle(issue.priority);
+    "badge text-white font-semibold px-3 rounded-full " +
+    getModalPriorityClass(issue.priority);
 
-  // Labels
+  // Modal labels
   var labelsContainer = document.getElementById("modal-labels");
   labelsContainer.innerHTML = "";
-  var labelsArray = getLabelsArray(issue.labels);
+  labelsContainer.style.cssText =
+    "display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:16px;";
 
-  labelsArray.forEach(function (label) {
-    var style = getLabelStyle(label);
-    var span = document.createElement("span");
-    span.className =
-      "inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium " +
-      style.classes;
-    span.innerHTML = style.icon + label;
-    labelsContainer.appendChild(span);
+  getLabelsArray(issue.labels).forEach(function (label) {
+    var info = getLabelStyle(label);
+    var badge = document.createElement("span");
+    badge.style.cssText =
+      "display:flex; flex-direction:row; align-items:center; background:" +
+      info.bg +
+      "; color:" +
+      info.color +
+      "; border:1px solid " +
+      info.border +
+      "; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600; white-space:nowrap;";
+
+    if (info.iconSrc) {
+      var iconEl = document.createElement("img");
+      iconEl.src = info.iconSrc;
+      iconEl.style.cssText =
+        "width:12px; height:12px; margin-right:5px; display:block;";
+      badge.appendChild(iconEl);
+    }
+    badge.appendChild(document.createTextNode(label));
+    labelsContainer.appendChild(badge);
   });
 
-  // Show the modal
   document.getElementById("issue-modal").showModal();
 }
 
 // =============================================
-// HELPER: Extract Labels as Array of Strings
-// Handles: array of strings, array of objects, or a comma-separated string
+// HELPER: Extract labels as string array
 // =============================================
 function getLabelsArray(labels) {
   if (!labels) return [];
-
   if (Array.isArray(labels)) {
     return labels.map(function (l) {
-      if (typeof l === "object" && l !== null) {
-        return l.name || l.label || String(l);
-      }
-      return String(l);
+      return typeof l === "object" ? l.name || l.label || "" : String(l);
     });
   }
-
   if (typeof labels === "string") {
     return labels
       .split(",")
@@ -343,12 +350,11 @@ function getLabelsArray(labels) {
       })
       .filter(Boolean);
   }
-
   return [];
 }
 
 // =============================================
-// HELPER: Show or Hide the Loading Spinner
+// HELPER: Show / Hide loading spinner
 // =============================================
 function showLoading(show) {
   var loadingEl = document.getElementById("loading");
@@ -365,89 +371,73 @@ function showLoading(show) {
 }
 
 // =============================================
-// HELPER: Format Date as M/D/YYYY
+// HELPER: Format date as M/D/YYYY
 // =============================================
 function formatDate(dateString) {
   if (!dateString) return "Unknown date";
-
   var date = new Date(dateString);
   if (isNaN(date.getTime())) return dateString;
-
-  var month = date.getMonth() + 1;
-  var day = date.getDate();
-  var year = date.getFullYear();
-
-  return month + "/" + day + "/" + year;
+  return date.getMonth() + 1 + "/" + date.getDate() + "/" + date.getFullYear();
 }
 
 // =============================================
-// HELPER: Priority Badge Style for Cards
-// Matches the screenshot — colored text on light bg
+// HELPER: Priority style for cards (returns object with bg + color)
 // =============================================
 function getPriorityStyle(priority) {
-  if (!priority) return "bg-gray-100 text-gray-400";
-
-  var p = priority.toLowerCase();
-  if (p === "high") return "bg-red-100 text-red-400 rounded-full";
-  if (p === "medium") return "bg-orange-100 text-orange-400 rounded-full";
-  if (p === "low") return "bg-gray-100 text-gray-400 rounded-full";
-
-  return "bg-gray-100 text-gray-400 rounded-full";
+  var p = (priority || "").toLowerCase();
+  if (p === "high") return { bg: "#fee2e2", color: "#f87171" };
+  if (p === "medium") return { bg: "#ffedd5", color: "#fb923c" };
+  if (p === "low") return { bg: "#f3f4f6", color: "#9ca3af" };
+  return { bg: "#f3f4f6", color: "#9ca3af" };
 }
 
 // =============================================
-// HELPER: Priority Badge Style for Modal
+// HELPER: Priority class for modal badge
 // =============================================
-function getModalPriorityStyle(priority) {
-  if (!priority) return "bg-gray-400";
-
-  var p = priority.toLowerCase();
+function getModalPriorityClass(priority) {
+  var p = (priority || "").toLowerCase();
   if (p === "high") return "bg-red-500";
   if (p === "medium") return "bg-orange-400";
   if (p === "low") return "bg-blue-400";
-
   return "bg-gray-400";
 }
 
 // =============================================
-// HELPER: Label Badge Style + Icon
+// HELPER: Label style — returns bg, color, border, iconSrc
 // =============================================
 function getLabelStyle(label) {
-  if (!label)
-    return { classes: "bg-gray-100 text-gray-500 border-gray-300", icon: "" };
-
-  var l = label.toLowerCase();
+  var l = (label || "").toLowerCase();
 
   if (l === "bug") {
     return {
-      classes: "bg-red-50 text-red-500 border-red-200",
-      icon: '<span class="mr-0.5">🐛</span>',
+      bg: "#fee2e2",
+      color: "#ef4444",
+      border: "#fca5a5",
+      iconSrc: "assets/bug.png",
     };
   }
   if (l === "help wanted") {
     return {
-      classes: "bg-green-50 text-green-600 border-green-200",
-      icon: '<span class="mr-0.5">🙌</span>',
+      bg: "#fef9c3",
+      color: "#ca8a04",
+      border: "#fde047",
+      iconSrc: "assets/help_wanted.png",
     };
   }
   if (l === "enhancement") {
     return {
-      classes: "bg-purple-50 text-purple-600 border-purple-200",
-      icon: '<span class="mr-0.5">✨</span>',
+      bg: "#dcfce7",
+      color: "#16a34a",
+      border: "#86efac",
+      iconSrc: "assets/enhancement.png",
     };
   }
   if (l === "feature") {
-    return {
-      classes: "bg-blue-50 text-blue-600 border-blue-200",
-      icon: '<span class="mr-0.5">🚀</span>',
-    };
+    return { bg: "#dbeafe", color: "#2563eb", border: "#93c5fd", iconSrc: "" };
   }
   if (l === "documentation") {
-    return {
-      classes: "bg-yellow-50 text-yellow-600 border-yellow-200",
-      icon: '<span class="mr-0.5">📄</span>',
-    };
+    return { bg: "#fef3c7", color: "#d97706", border: "#fcd34d", iconSrc: "" };
   }
 
-  return { classes: "bg-gray-100 text-gray-500 border-gray-300", icon: "" };
+  return { bg: "#f3f4f6", color: "#6b7280", border: "#d1d5db", iconSrc: "" };
 }
