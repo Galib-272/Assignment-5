@@ -4,14 +4,14 @@
 
 // --- API URLs ---
 var API_ALL_ISSUES = "https://phi-lab-server.vercel.app/api/v1/lab/issues";
-var API_SEARCH     = "https://phi-lab-server.vercel.app/api/v1/lab/issues/search?q=";
-var API_SINGLE     = "https://phi-lab-server.vercel.app/api/v1/lab/issue/";
+var API_SEARCH =
+  "https://phi-lab-server.vercel.app/api/v1/lab/issues/search?q=";
+var API_SINGLE = "https://phi-lab-server.vercel.app/api/v1/lab/issue/";
 
 // --- App State ---
-var allIssues  = [];
+var allIssues = [];
 var currentTab = "all";
 var searchTimer = null;
-
 
 // =============================================
 // ON PAGE LOAD
@@ -24,7 +24,6 @@ window.onload = function () {
   loadAllIssues();
 };
 
-
 // =============================================
 // SIGN OUT
 // =============================================
@@ -33,7 +32,6 @@ function signOut() {
   window.location.href = "index.html";
 }
 
-
 // =============================================
 // FETCH ALL ISSUES FROM THE API
 // =============================================
@@ -41,7 +39,9 @@ function loadAllIssues() {
   showLoading(true);
 
   fetch(API_ALL_ISSUES)
-    .then(function (response) { return response.json(); })
+    .then(function (response) {
+      return response.json();
+    })
     .then(function (data) {
       if (Array.isArray(data)) {
         allIssues = data;
@@ -61,7 +61,6 @@ function loadAllIssues() {
     });
 }
 
-
 // =============================================
 // TAB SWITCHING
 // =============================================
@@ -74,14 +73,14 @@ function switchTab(tab) {
     if (t === tab) {
       btn.className = "btn btn-sm btn-primary text-white px-5";
     } else {
-      btn.className = "btn btn-sm btn-ghost border border-gray-200 bg-white text-gray-700 px-5";
+      btn.className =
+        "btn btn-sm btn-ghost border border-gray-200 bg-white text-gray-700 px-5";
     }
   });
 
   document.getElementById("search-input").value = "";
   renderIssues(filterByTab(allIssues, tab));
 }
-
 
 // =============================================
 // FILTER BY TAB
@@ -92,7 +91,6 @@ function filterByTab(issues, tab) {
     return (issue.status || "").toLowerCase() === tab;
   });
 }
-
 
 // =============================================
 // SEARCH
@@ -108,25 +106,31 @@ function handleSearch(query) {
   searchTimer = setTimeout(function () {
     showLoading(true);
     fetch(API_SEARCH + encodeURIComponent(query.trim()))
-      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        return res.json();
+      })
       .then(function (data) {
-        var results = Array.isArray(data) ? data : (data.issues || data.data || []);
+        var results = Array.isArray(data)
+          ? data
+          : data.issues || data.data || [];
         renderIssues(filterByTab(results, currentTab));
         showLoading(false);
       })
-      .catch(function () { showLoading(false); });
+      .catch(function () {
+        showLoading(false);
+      });
   }, 400);
 }
-
 
 // =============================================
 // RENDER ISSUES
 // =============================================
 function renderIssues(issues) {
-  var grid      = document.getElementById("issues-grid");
+  var grid = document.getElementById("issues-grid");
   var noResults = document.getElementById("no-results");
 
-  document.getElementById("issue-count").textContent = issues.length + " Issues";
+  document.getElementById("issue-count").textContent =
+    issues.length + " Issues";
   grid.innerHTML = "";
 
   if (issues.length === 0) {
@@ -143,7 +147,6 @@ function renderIssues(issues) {
   });
 }
 
-
 // =============================================
 // BUILD ONE CARD — using DOM methods, no innerHTML for labels
 // =============================================
@@ -153,22 +156,37 @@ function buildCard(issue) {
 
   // --- Card wrapper ---
   var card = document.createElement("div");
-  card.style.cssText = "background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); border-top:4px solid " + (isOpen ? "#22c55e" : "#a855f7") + "; padding:16px; cursor:pointer; transition:box-shadow 0.2s; display:flex; flex-direction:column; height:100%;";
-  card.addEventListener("mouseenter", function () { card.style.boxShadow = "0 4px 12px rgba(0,0,0,0.12)"; });
-  card.addEventListener("mouseleave", function () { card.style.boxShadow = "0 1px 3px rgba(0,0,0,0.08)"; });
+  card.style.cssText =
+    "background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); border-top:4px solid " +
+    (isOpen ? "#22c55e" : "#a855f7") +
+    "; padding:16px; cursor:pointer; transition:box-shadow 0.2s; display:flex; flex-direction:column; height:100%;";
+  card.addEventListener("mouseenter", function () {
+    card.style.boxShadow = "0 4px 12px rgba(0,0,0,0.12)";
+  });
+  card.addEventListener("mouseleave", function () {
+    card.style.boxShadow = "0 1px 3px rgba(0,0,0,0.08)";
+  });
 
   // --- Top row: status icon + priority badge ---
   var topRow = document.createElement("div");
-  topRow.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;";
+  topRow.style.cssText =
+    "display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;";
 
   var iconImg = document.createElement("img");
-  iconImg.src = isOpen ? "assets/Open-Status.png" : "assets/Closed- Status .png";
+  iconImg.src = isOpen
+    ? "assets/Open-Status.png"
+    : "assets/Closed- Status .png";
   iconImg.style.cssText = "width:20px; height:20px;";
 
   var priorityInfo = getPriorityStyle(issue.priority);
   var prioritySpan = document.createElement("span");
   prioritySpan.textContent = (issue.priority || "N/A").toUpperCase();
-  prioritySpan.style.cssText = "background:" + priorityInfo.bg + "; color:" + priorityInfo.color + "; border-radius:999px; padding:3px 10px; font-size:11px; font-weight:700;";
+  prioritySpan.style.cssText =
+    "background:" +
+    priorityInfo.bg +
+    "; color:" +
+    priorityInfo.color +
+    "; border-radius:999px; padding:3px 10px; font-size:11px; font-weight:700;";
 
   topRow.appendChild(iconImg);
   topRow.appendChild(prioritySpan);
@@ -177,30 +195,41 @@ function buildCard(issue) {
   // --- Title ---
   var title = document.createElement("h3");
   title.textContent = issue.title || "Untitled";
-  title.style.cssText = "font-weight:700; color:#1f2937; font-size:13px; line-height:1.4; margin-bottom:6px;";
+  title.style.cssText =
+    "font-weight:700; color:#1f2937; font-size:13px; line-height:1.4; margin-bottom:6px;";
   card.appendChild(title);
 
   // --- Description ---
   var desc = document.createElement("p");
   desc.textContent = issue.description || "No description.";
-  desc.style.cssText = "color:#9ca3af; font-size:11px; margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;";
+  desc.style.cssText =
+    "color:#9ca3af; font-size:11px; margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;";
   card.appendChild(desc);
 
   // --- Labels row ---
   var labelsRow = document.createElement("div");
-  labelsRow.style.cssText = "display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:12px; margin-top:auto;";
+  labelsRow.style.cssText =
+    "display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:12px; margin-top:auto;";
 
   var labelsArray = getLabelsArray(issue.labels);
   labelsArray.forEach(function (label) {
     var info = getLabelStyle(label);
 
     var badge = document.createElement("span");
-    badge.style.cssText = "display:flex; flex-direction:row; align-items:center; background:" + info.bg + "; color:" + info.color + "; border:1px solid " + info.border + "; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600; white-space:nowrap;";
+    badge.style.cssText =
+      "display:flex; flex-direction:row; align-items:center; background:" +
+      info.bg +
+      "; color:" +
+      info.color +
+      "; border:1px solid " +
+      info.border +
+      "; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600; white-space:nowrap;";
 
     if (info.iconSrc) {
       var iconEl = document.createElement("img");
       iconEl.src = info.iconSrc;
-      iconEl.style.cssText = "width:12px; height:12px; margin-right:5px; display:block;";
+      iconEl.style.cssText =
+        "width:12px; height:12px; margin-right:5px; display:block;";
       badge.appendChild(iconEl);
     }
 
@@ -214,84 +243,129 @@ function buildCard(issue) {
 
   // --- Divider line ---
   var divider = document.createElement("hr");
-  divider.style.cssText = "border:none; border-top:1px solid #e5e7eb; margin-bottom:10px;";
+  divider.style.cssText =
+    "border:none; border-top:1px solid #e5e7eb; margin-bottom:10px;";
   card.appendChild(divider);
 
   // --- Footer: issue number, author, date ---
   var footer = document.createElement("div");
   footer.style.cssText = "color:#9ca3af; font-size:11px;";
 
-  var author   = issue.author || issue.user || issue.createdBy || "unknown";
+  var author = issue.author || issue.user || issue.createdBy || "unknown";
   var issueNum = issue.id || issue._id || issue.number || "?";
   var dateText = formatDate(issue.createdAt || issue.created_at);
 
-  footer.innerHTML = "<p>#" + issueNum + " by " + author + "</p><p>" + dateText + "</p>";
+  footer.innerHTML =
+    "<p>#" + issueNum + " by " + author + "</p><p>" + dateText + "</p>";
   card.appendChild(footer);
 
   // Click opens modal
-  card.addEventListener("click", function () { openModal(issue); });
+  card.addEventListener("click", function () {
+    openModal(issue);
+  });
 
   return card;
 }
 
-
 // =============================================
-// OPEN MODAL
+// OPEN MODAL — shows spinner first, then fills content
 // =============================================
 function openModal(issue) {
-  // The all-issues API puts fields directly on the object
-  // The single-issue API wraps them in a "data" property — handle both
-  var issueData = issue.data ? issue.data : issue;
+  var modal = document.getElementById("issue-modal");
+  var modalBox = modal.querySelector(".modal-box");
 
-  document.getElementById("modal-title").textContent = issueData.title || "No Title";
+  // Remove any leftover spinner
+  var old = document.getElementById("modal-spinner");
+  if (old) old.remove();
 
-  var statusBadge = document.getElementById("modal-status-badge");
-  var status = (issueData.status || "").toLowerCase();
-  var isOpen = status === "open";
-  statusBadge.textContent = isOpen ? "Opened" : "Closed";
-  statusBadge.className = "badge text-white font-semibold px-3 py-1 rounded-full " + (isOpen ? "bg-green-500" : "bg-purple-500");
+  // Inject spinner overlay
+  var spinner = document.createElement("div");
+  spinner.id = "modal-spinner";
+  spinner.style.cssText =
+    "position:absolute; inset:0; background:rgba(255,255,255,0.92); display:flex; align-items:center; justify-content:center; border-radius:12px; z-index:10;";
+  spinner.innerHTML =
+    '<span class="loading loading-spinner loading-lg text-primary"></span>';
+  modalBox.style.position = "relative";
+  modalBox.appendChild(spinner);
 
-  document.getElementById("modal-author").textContent = issueData.author || issueData.user || "Unknown";
-  document.getElementById("modal-date").textContent = formatDate(issueData.createdAt || issueData.created_at);
-  document.getElementById("modal-description").textContent = issueData.description || "No description.";
-  document.getElementById("modal-assignee").textContent = issueData.assignee || "—";
+  // Open modal — spinner shows immediately
+  modal.showModal();
 
-  var priorityBadge = document.getElementById("modal-priority-badge");
-  priorityBadge.textContent = (issueData.priority || "N/A").toUpperCase();
-  var p = (issueData.priority || "").toLowerCase();
-  if (p === "high") {
-    priorityBadge.className = "badge text-white font-semibold px-3 rounded-full bg-red-500";
-  } else if (p === "medium") {
-    priorityBadge.className = "badge font-semibold px-3 rounded-full bg-yellow-100 text-yellow-600";
-  } else if (p === "low") {
-    priorityBadge.className = "badge font-semibold px-3 rounded-full bg-gray-200 text-gray-500";
-  } else {
-    priorityBadge.className = "badge font-semibold px-3 rounded-full bg-gray-200 text-gray-500";
-  }
+  // After 500ms remove spinner and populate content
+  setTimeout(function () {
+    var spinnerEl = document.getElementById("modal-spinner");
+    if (spinnerEl) spinnerEl.remove();
 
-  // Modal labels
-  var labelsContainer = document.getElementById("modal-labels");
-  labelsContainer.innerHTML = "";
-  labelsContainer.style.cssText = "display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:16px;";
+    var issueData = issue.data ? issue.data : issue;
 
-  getLabelsArray(issueData.labels).forEach(function (label) {
-    var info = getLabelStyle(label);
-    var badge = document.createElement("span");
-    badge.style.cssText = "display:flex; flex-direction:row; align-items:center; background:" + info.bg + "; color:" + info.color + "; border:1px solid " + info.border + "; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600; white-space:nowrap;";
+    document.getElementById("modal-title").textContent =
+      issueData.title || "No Title";
 
-    if (info.iconSrc) {
-      var iconEl = document.createElement("img");
-      iconEl.src = info.iconSrc;
-      iconEl.style.cssText = "width:12px; height:12px; margin-right:5px; display:block;";
-      badge.appendChild(iconEl);
+    var statusBadge = document.getElementById("modal-status-badge");
+    var status = (issueData.status || "").toLowerCase();
+    var isOpen = status === "open";
+    statusBadge.textContent = isOpen ? "Opened" : "Closed";
+    statusBadge.className =
+      "badge text-white font-semibold px-3 py-1 rounded-full " +
+      (isOpen ? "bg-green-500" : "bg-purple-500");
+
+    document.getElementById("modal-author").textContent =
+      issueData.author || issueData.user || "Unknown";
+    document.getElementById("modal-date").textContent = formatDate(
+      issueData.createdAt || issueData.created_at,
+    );
+    document.getElementById("modal-description").textContent =
+      issueData.description || "No description.";
+    document.getElementById("modal-assignee").textContent =
+      issueData.assignee || "—";
+
+    var priorityBadge = document.getElementById("modal-priority-badge");
+    priorityBadge.textContent = (issueData.priority || "N/A").toUpperCase();
+    var p = (issueData.priority || "").toLowerCase();
+    if (p === "high") {
+      priorityBadge.className =
+        "badge text-white font-semibold px-3 rounded-full bg-red-500";
+    } else if (p === "medium") {
+      priorityBadge.className =
+        "badge font-semibold px-3 rounded-full bg-yellow-100 text-yellow-600";
+    } else if (p === "low") {
+      priorityBadge.className =
+        "badge font-semibold px-3 rounded-full bg-gray-200 text-gray-500";
+    } else {
+      priorityBadge.className =
+        "badge font-semibold px-3 rounded-full bg-gray-200 text-gray-500";
     }
-    badge.appendChild(document.createTextNode(label));
-    labelsContainer.appendChild(badge);
-  });
 
-  document.getElementById("issue-modal").showModal();
+    // Labels
+    var labelsContainer = document.getElementById("modal-labels");
+    labelsContainer.innerHTML = "";
+    labelsContainer.style.cssText =
+      "display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:16px;";
+
+    getLabelsArray(issueData.labels).forEach(function (label) {
+      var info = getLabelStyle(label);
+      var badge = document.createElement("span");
+      badge.style.cssText =
+        "display:flex; flex-direction:row; align-items:center; background:" +
+        info.bg +
+        "; color:" +
+        info.color +
+        "; border:1px solid " +
+        info.border +
+        "; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:600; white-space:nowrap;";
+
+      if (info.iconSrc) {
+        var iconEl = document.createElement("img");
+        iconEl.src = info.iconSrc;
+        iconEl.style.cssText =
+          "width:12px; height:12px; margin-right:5px; display:block;";
+        badge.appendChild(iconEl);
+      }
+      badge.appendChild(document.createTextNode(label));
+      labelsContainer.appendChild(badge);
+    });
+  }, 500);
 }
-
 
 // =============================================
 // HELPER: Extract labels as string array
@@ -300,22 +374,26 @@ function getLabelsArray(labels) {
   if (!labels) return [];
   if (Array.isArray(labels)) {
     return labels.map(function (l) {
-      return typeof l === "object" ? (l.name || l.label || "") : String(l);
+      return typeof l === "object" ? l.name || l.label || "" : String(l);
     });
   }
   if (typeof labels === "string") {
-    return labels.split(",").map(function (l) { return l.trim(); }).filter(Boolean);
+    return labels
+      .split(",")
+      .map(function (l) {
+        return l.trim();
+      })
+      .filter(Boolean);
   }
   return [];
 }
-
 
 // =============================================
 // HELPER: Show / Hide loading spinner
 // =============================================
 function showLoading(show) {
   var loadingEl = document.getElementById("loading");
-  var gridEl    = document.getElementById("issues-grid");
+  var gridEl = document.getElementById("issues-grid");
   var noResults = document.getElementById("no-results");
 
   if (show) {
@@ -327,7 +405,6 @@ function showLoading(show) {
   }
 }
 
-
 // =============================================
 // HELPER: Format date as M/D/YYYY
 // =============================================
@@ -335,33 +412,30 @@ function formatDate(dateString) {
   if (!dateString) return "Unknown date";
   var date = new Date(dateString);
   if (isNaN(date.getTime())) return dateString;
-  return (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
+  return date.getMonth() + 1 + "/" + date.getDate() + "/" + date.getFullYear();
 }
-
 
 // =============================================
 // HELPER: Priority style for cards (returns object with bg + color)
 // =============================================
 function getPriorityStyle(priority) {
   var p = (priority || "").toLowerCase();
-  if (p === "high")   return { bg: "#fee2e2", color: "#f87171" };
+  if (p === "high") return { bg: "#fee2e2", color: "#f87171" };
   if (p === "medium") return { bg: "#fef9c3", color: "#ca8a04" };
-  if (p === "low")    return { bg: "#f3f4f6", color: "#9ca3af" };
+  if (p === "low") return { bg: "#f3f4f6", color: "#9ca3af" };
   return { bg: "#f3f4f6", color: "#9ca3af" };
 }
-
 
 // =============================================
 // HELPER: Priority class for modal badge
 // =============================================
 function getModalPriorityClass(priority) {
   var p = (priority || "").toLowerCase();
-  if (p === "high")   return "bg-red-500";
+  if (p === "high") return "bg-red-500";
   if (p === "medium") return "bg-yellow-400";
-  if (p === "low")    return "bg-gray-200 !text-gray-500";
+  if (p === "low") return "bg-gray-200 !text-gray-500";
   return "bg-gray-200 !text-gray-500";
 }
-
 
 // =============================================
 // HELPER: Label style — returns bg, color, border, iconSrc
@@ -370,13 +444,28 @@ function getLabelStyle(label) {
   var l = (label || "").toLowerCase();
 
   if (l === "bug") {
-    return { bg: "#fee2e2", color: "#ef4444", border: "#fca5a5", iconSrc: "assets/bug.png" };
+    return {
+      bg: "#fee2e2",
+      color: "#ef4444",
+      border: "#fca5a5",
+      iconSrc: "assets/bug.png",
+    };
   }
   if (l === "help wanted") {
-    return { bg: "#fef9c3", color: "#ca8a04", border: "#fde047", iconSrc: "assets/help_wanted.png" };
+    return {
+      bg: "#fef9c3",
+      color: "#ca8a04",
+      border: "#fde047",
+      iconSrc: "assets/help_wanted.png",
+    };
   }
   if (l === "enhancement") {
-    return { bg: "#dcfce7", color: "#16a34a", border: "#86efac", iconSrc: "assets/enhancement.png" };
+    return {
+      bg: "#dcfce7",
+      color: "#16a34a",
+      border: "#86efac",
+      iconSrc: "assets/enhancement.png",
+    };
   }
   if (l === "feature") {
     return { bg: "#dbeafe", color: "#2563eb", border: "#93c5fd", iconSrc: "" };
