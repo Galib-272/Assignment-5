@@ -248,7 +248,7 @@ function openModal(issue) {
     document.getElementById("modal-description").textContent =
       issueData.description || "No description.";
     document.getElementById("modal-assignee").textContent =
-      issueData.assignee || "—";
+      issueData.assignee || "Not found";
     // Set priority badge style
     const priorityBadge = document.getElementById("modal-priority-badge");
     priorityBadge.textContent = (issueData.priority || "N/A").toUpperCase();
